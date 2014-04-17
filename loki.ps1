@@ -1,6 +1,6 @@
 ﻿$Global:__loki = @{}
  
-function Apply-LokiFile {
+function Register-LokiFile {
 
   function Get-LokiFile {
     $currentDir = Get-Location
@@ -27,6 +27,26 @@ function Apply-LokiFile {
   $module = New-Module -Name "$lokiFile" -ScriptBlock {}
   . $module $lokiFile
   Import-Module $module
+}
+
+function Add-LokiFile {
+  [CmdletBinding()]
+  param([Parameter()] [string] $path)
+  
+  $filePath = Join-Path $path ".loki.ps1"
+  if(Test-Path $filePath) {
+    Write-Output "Loki file already exists"
+    return
+  }
+  $contents = @"
+function Out-HelloWorld {
+  Write-Host "Hello, World!"
+}
+ 
+Export-ModuleMember -Function Out-HelloWorld
+"@
+  
+  $contents | Out-File $filePath -Encoding utf8
 }
 
 <#
@@ -88,6 +108,6 @@ function Set-Location {
         throw
     }
  
-    Apply-LokiFile
+    Register-LokiFile
   }
 }
